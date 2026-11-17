@@ -5,34 +5,53 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v3.4-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-An enterprise-grade **Appointment & Booking Scheduling System REST API** built with Node.js, Express, automated double-booking conflict detection, appointment status management (`Pending`, `Confirmed`, `Cancelled`), and a responsive dark-mode scheduling dashboard styled with **Tailwind CSS**.
+An enterprise-grade **Appointment & Booking Scheduling System REST API** built with Node.js, Express, automated double-booking conflict prevention, appointment status lifecycle management (`Pending`, `Confirmed`, `Cancelled`), and a responsive dark-mode scheduling dashboard styled with **Tailwind CSS**.
+
+---
+
+## 📋 Table of Contents
+1. [Core Features & Highlights](#-core-features--highlights)
+2. [Tech Stack & Architecture](#-tech-stack--architecture)
+3. [Project Folder Structure](#-project-folder-structure)
+4. [API Endpoints Reference](#-api-endpoints-reference)
+5. [Local Installation & Setup](#-local-installation--setup)
+6. [Testing the Application](#-testing-the-application)
+7. [Author & Developer](#-author--developer)
 
 ---
 
 ## 🌟 Core Features & Highlights
 
-* **Double-Booking Prevention:** Automatically validates selected date and time slots to block overlapping appointments.
-* **Status Lifecycle Management:** Seamless transitions between `Pending`, `Confirmed`, and `Cancelled` states via REST `PATCH` endpoints.
-* **Service Catalog Selection:** Supports multiple consultation and service categories with instant UI feedback.
-* **Modern Tailwind CSS UI:** Responsive dark-mode scheduling portal with real-time queue updates.
+* **Double-Booking Prevention Engine:** Automatically checks existing active appointments on the requested date and time slot, returning an HTTP `409 Conflict` error if the slot is already reserved.
+* **Status Lifecycle Management:** Supports real-time transitions across `Pending`, `Confirmed`, and `Cancelled` states using RESTful `PATCH` endpoints.
+* **Service Catalog Selection:** Pre-configured service options with automatic date defaults for fast booking workflows.
+* **Modern Dark-Mode UI:** Clean two-column dashboard styled with Tailwind CSS for instant scheduling and queue management.
+* **Clean Modular Architecture:** Separated routing handlers, in-memory store, and server configuration.
 
 ---
 
-## 🔌 API Endpoints Reference
+## 🛠️ Tech Stack & Architecture
 
-| Method | Endpoint | Description |
+| Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| `GET` | `/api/appointments` | Retrieves all scheduled appointments. |
-| `POST` | `/api/appointments` | Books a new appointment with slot conflict validation. |
-| `PATCH` | `/api/appointments/:id/status` | Updates booking status (`Pending`, `Confirmed`, `Cancelled`). |
-| `DELETE` | `/api/appointments/:id` | Removes an appointment record. |
+| **Frontend UI** | HTML5 & Tailwind CSS | Responsive booking form and live appointments management queue |
+| **Backend Runtime** | Node.js & Express.js | REST routing, conflict validation logic, and status updates |
 
 ---
 
-## ⚙️ Local Installation & Setup
+## 📂 Project Folder Structure
 
-```bash
-git clone [https://github.com/Sameerjeez88-max/appointment-booking-api.git](https://github.com/Sameerjeez88-max/appointment-booking-api.git)
-cd appointment-booking-api
-npm install
-npm start
+```text
+appointment-booking-api/
+├── public/
+│   └── index.html             # Tailwind CSS booking & scheduling dashboard UI
+├── src/
+│   ├── routes/
+│   │   └── bookingRoutes.js   # Booking CRUD, slot validation & status endpoints
+│   └── data/
+│       └── store.js           # In-memory database store for appointments
+├── server.js                  # Main entry point & static file server
+├── package.json               # Dependencies and scripts manifest
+├── .env                       # Environment variables configuration
+├── .gitignore                 # Git ignore exclusions
+└── README.md                  # Comprehensive technical documentation
