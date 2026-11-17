@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment & Booking Scheduler — Rana Yasir Mahy Ud Din</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-xl shadow-lg">AB</div>
+        <span class="text-lg font-bold tracking-wider">SlotSync Scheduler</span>
+      </div>
+      <div class="text-xs text-slate-400">
+        Developer: <span class="text-indigo-400 font-medium">Rana Yasir Mahy Ud Din</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-6 py-10 flex-grow w-full">
+    <div class="text-center mb-10">
+      <h1 class="text-3xl font-extrabold tracking-tight mb-2">Appointment & Booking Engine</h1>
+      <p class="text-slate-400 text-sm max-w-lg mx-auto">Schedule consultations with real-time slot conflict validation and instant status management.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Booking Form -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl h-fit">
+        <h2 class="text-lg font-bold mb-4 text-indigo-400">📅 Book a Session</h2>
+        <form id="booking-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Client Name</label>
+            <input type="text" id="clientName" required placeholder="e.g. Bilal Ahmed" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Client Email</label>
+            <input type="email" id="clientEmail" required placeholder="client@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Service Type</label>
+            <select id="service" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
+              <option value="Full-Stack Architecture Consultation">Full-Stack Architecture Consultation</option>
+              <option value="UI/UX Brand Audit">UI/UX Brand Audit</option>
+              <option value="API & Cloud Deployment Review">API & Cloud Deployment Review</option>
+              <option value="E-Commerce Store Optimization">E-Commerce Store Optimization</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Date</label>
+              <input type="date" id="date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Time Slot</label>
+              <select id="timeSlot" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-200">
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="12:00 PM">12:00 PM</option>
+                <option value="02:00 PM">02:00 PM</option>
+                <option value="04:00 PM">04:00 PM</option>
+                <option value="06:00 PM">06:00 PM</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20 text-sm">
+            Confirm Booking
+          </button>
+        </form>
+        <div id="msg" class="mt-3 text-xs text-center hidden"></div>
+      </div>
+
+      <!-- Appointments Queue -->
+      <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <h2 class="text-lg font-bold mb-4 border-b border-slate-800 pb-3">Scheduled Appointments</h2>
+        <div id="appointments-list" class="space-y-3">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-900/40 py-6 text-center text-xs text-slate-500">
+    © 2026 Rana Yasir Mahy Ud Din • Appointment & Booking Scheduling System
+  </footer>
+
+  <script>
+    // Set default date to tomorrow
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    document.getElementById('date').value = tomorrow;
+
+    async function fetchAppointments() {
+      try {
+        const res = await fetch('/api/appointments');
+        const json = await res.json();
+        if (json.success) {
+          renderAppointments(json.data);
+        }
+      } catch (err) {
+        console.error('Error fetching appointments:', err);
+      }
+    }
+
+    function renderAppointments(items) {
+      const list = document.getElementById('appointments-list');
+      if (items.length === 0) {
+        list.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">No appointments scheduled yet.</p>`;
+        return;
+      }
+
+      list.innerHTML = items.map(a => {
+        const badgeStyle = a.status === 'Confirmed'
+          ? 'bg-emerald-500/10 text-emerald-400'
+          : a.status === 'Cancelled'
+          ? 'bg-red-500/10 text-red-400'
+          : 'bg-amber-500/10 text-amber-400';
+
+        return `
+          <div class="p-4 bg-slate-950/60 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-sm">
+            <div>
+              <div class="flex items-center space-x-2 mb-1">
+                <h4 class="font-bold text-slate-100">${a.clientName}</h4>
+                <span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold ${badgeStyle}">${a.status}</span>
+              </div>
+              <p class="text-xs text-indigo-400 font-medium">${a.service}</p>
+              <p class="text-xs text-slate-400 mt-1">📅 ${a.date} • ⏰ ${a.timeSlot} • ✉️ ${a.clientEmail}</p>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+              ${a.status !== 'Confirmed' ? `<button onclick="updateStatus(${a.id}, 'Confirmed')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-lg font-medium transition-all">Confirm</button>` : ''}
+              ${a.status !== 'Cancelled' ? `<button onclick="updateStatus(${a.id}, 'Cancelled')" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs px-3 py-1.5 rounded-lg font-medium transition-all">Cancel</button>` : ''}
+              <button onclick="deleteBooking(${a.id})" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs px-3 py-1.5 rounded-lg font-medium transition-all">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const clientName = document.getElementById('clientName').value;
+      const clientEmail = document.getElementById('clientEmail').value;
+      const service = document.getElementById('service').value;
+      const date = document.getElementById('date').value;
+      const timeSlot = document.getElementById('timeSlot').value;
+      const msg = document.getElementById('msg');
+
+      try {
+        const res = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientName, clientEmail, service, date, timeSlot })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          msg.innerText = '✅ ' + json.message;
+          msg.classList.remove('hidden', 'text-red-400');
+          msg.classList.add('text-emerald-400');
+          document.getElementById('clientName').value = '';
+          document.getElementById('clientEmail').value = '';
+          fetchAppointments();
+        } else {
+          msg.innerText = '❌ ' + json.message;
+          msg.classList.remove('hidden', 'text-emerald-400');
+          msg.classList.add('text-red-400');
+        }
+      } catch (err) {
+        msg.innerText = '❌ Failed to schedule appointment.';
+        msg.classList.remove('hidden', 'text-emerald-400');
+        msg.classList.add('text-red-400');
+      }
+    });
+
+    async function updateStatus(id, status) {
+      try {
+        const res = await fetch(`/api/appointments/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const json = await res.json();
+        if (json.success) fetchAppointments();
+      } catch (err) {
+        alert('Failed to update status.');
+      }
+    }
+
+    async function deleteBooking(id) {
+      if (!confirm('Delete this appointment record?')) return;
+      try {
+        const res = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) fetchAppointments();
+      } catch (err) {
+        alert('Failed to delete booking.');
+      }
+    }
+
+    fetchAppointments();
+  </script>
+</body>
+</html>
